@@ -1,4 +1,4 @@
-package com.github.murilo_sys.desafio_itau_java_junior.exception;
+package com.github.murilo_sys.desafio_itau_java_junior.exception.response;
 
 import java.util.Date;
 
