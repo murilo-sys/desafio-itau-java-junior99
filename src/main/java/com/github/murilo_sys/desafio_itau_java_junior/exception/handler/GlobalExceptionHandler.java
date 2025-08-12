@@ -1,7 +1,6 @@
 package com.github.murilo_sys.desafio_itau_java_junior.exception.handler;
 
 import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
-import com.github.murilo_sys.desafio_itau_java_junior.exception.BadRequestException;
 import com.github.murilo_sys.desafio_itau_java_junior.exception.UnprocessableEntityException;
 import com.github.murilo_sys.desafio_itau_java_junior.exception.response.ExceptionResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,20 +15,7 @@ import java.util.Date;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-
-    //Bad Request 400
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ExceptionResponse> handleBadRequestException(BadRequestException ex, HttpServletRequest request) {
-        ExceptionResponse response = new ExceptionResponse(
-                new Date(),
-                "400",
-                ex.getMessage(),
-                request.getRequestURI()
-        );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
-
-    //Bad Request 422
+    //Entidade Lida porém não tem lógica 422
     @ExceptionHandler(UnprocessableEntityException.class)
     public ResponseEntity<ExceptionResponse> handleUnprocessableEntityException(UnprocessableEntityException ex, HttpServletRequest request) {
         ExceptionResponse response = new ExceptionResponse(
@@ -41,19 +27,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
     }
 
+    // Bad Request 400
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ExceptionResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex, HttpServletRequest request) {
 
-        String mensagem = "Erro ao ler o corpo da requisição";
+        String mensagem = "Erro no corpo da requisição";
 
-            mensagem = ex.getMessage();
+        if (ex.getCause() instanceof ValueInstantiationException cause) {
+            mensagem = cause.getOriginalMessage();
 
-            // Remove "Cannot construct instance..." se existir
             if (mensagem != null && mensagem.contains("problem:")) {
                 mensagem = mensagem.substring(mensagem.indexOf("problem:") + 8).trim();
             }
+        }
 
-
+        
         ExceptionResponse response = new ExceptionResponse(
                 new Date(),
                 "400",
